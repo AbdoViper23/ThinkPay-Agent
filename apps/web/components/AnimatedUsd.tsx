@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { formatUsd } from "@mizan/shared";
+import { formatUsd } from "@thinkpay/shared";
 import { SPRING } from "@/lib/motion";
 
 /**

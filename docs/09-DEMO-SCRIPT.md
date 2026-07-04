@@ -4,7 +4,7 @@ Demo day: 5-min demo + 3-min Q&A. The submission video is 2 min. Lead with the m
 
 ## The 2-minute video (submission)
 
-1. **(0:00–0:20) The hook.** "Everyone's building agents that pay for things. The real problem is agents that pay for the *wrong* things, pay *twice*, and pay for *garbage*. Mizan is a spending conscience for agents — it decides what's worth paying for, on real money, over x402."
+1. **(0:00–0:20) The hook.** "Everyone's building agents that pay for things. The real problem is agents that pay for the *wrong* things, pay *twice*, and pay for *garbage*. ThinkPay is a spending conscience for agents — it decides what's worth paying for, on real money, over x402."
 2. **(0:20–1:10) Cold run.** Enter the task + `$0.25` budget + `$0.05` per-call limit. Narrate as the ledger streams: pays Provider A for holders ✓; pays Provider B for liquidity → **verify flags it off-topic, result dropped, not built on**; pays Provider C instead ✓; **duplicate call blocked, $0.01 saved**; audit is `$0.06` → **over the limit, escalated → Approve**. Finishes ~`$0.098`. Point at the dual ledger: reasoning (BTL) vs tools (x402).
 3. **(1:10–1:40) Warm run.** Same kind of task again. "Now it remembers." It skips the bad provider, goes straight to the best-scored ones, fewer calls, ~`$0.05`. The **"Saved by memory"** figure counts up.
 4. **(1:40–2:00) The close.** "Reasoning on the BTL Runtime, payments over x402, memory and judgment in between. Spot-only USDC, non-custodial, no leverage or gambling. Not a payment demo — a control plane."
@@ -27,11 +27,11 @@ Same spine, plus:
 
 - **"How does an LLM hold funds?"** It doesn't. Three layers: the model proposes tool calls; deterministic code enforces budget/dedupe/escalation; a viem wallet signs USDC via x402. The key lives only in the payment module, never in the model's context.
 - **"What stops a rogue/hijacked agent from draining the wallet?"** Guardrails are code, not prompt rules — hard cap, per-call ceiling with human escalation, duplicate + no-progress + iteration backstops. Roadmap: enforce the cap on-chain with an ERC-4337 session key so even a compromised backend can't exceed it.
-- **"Isn't x402 mostly hype right now?"** Cumulative numbers are big but a lot of volume is self-dealing; real commerce is early. That's exactly why the unmet need is *control and trust*, not more throughput — which is what Mizan addresses.
-- **"How is this different from budget-cap wallets / provider catalogs?"** Those do one axis each. Mizan combines spend guardrails + agent-owned cross-session provider learning + per-call goal-verification. No shipping product combines all three.
+- **"Isn't x402 mostly hype right now?"** Cumulative numbers are big but a lot of volume is self-dealing; real commerce is early. That's exactly why the unmet need is *control and trust*, not more throughput — which is what ThinkPay addresses.
+- **"How is this different from budget-cap wallets / provider catalogs?"** Those do one axis each. ThinkPay combines spend guardrails + agent-owned cross-session provider learning + per-call goal-verification. No shipping product combines all three.
 - **"Real users?"** The buyer is any team running agents that spend on tools — a FinOps/control-plane need as agent tool-spend scales. Demo is testnet; the path to a hosted control plane in front of real agents is direct.
 - **"Halal angle?"** Spot USDC for services rendered, non-custodial, no interest/leverage/perps/gambling. Values fit and a clean line around scope.
 
 ## One-liner to leave them with
 
-> "An agent that spends money is only useful if it has the judgment not to. Mizan is that judgment — on the BTL Runtime, over x402."
+> "An agent that spends money is only useful if it has the judgment not to. ThinkPay is that judgment — on the BTL Runtime, over x402."

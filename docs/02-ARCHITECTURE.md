@@ -80,7 +80,7 @@ sequenceDiagram
 ## Monorepo layout
 
 ```
-mizan/
+thinkpay/
 ├─ pnpm-workspace.yaml
 ├─ package.json                # root scripts (db:push, db:seed, dev orchestration)
 ├─ tsconfig.base.json

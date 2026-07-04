@@ -10,7 +10,7 @@ Next.js (App Router) + Tailwind + Recharts. Connects to the agent over SSE (`GET
 
 ```
 ┌───────────────────────────────────────────────────────────────────────┐
-│  MIZAN            [ task input ........................ ] [ Budget $  ] │
+│  THINKPAY            [ task input ........................ ] [ Budget $  ] │
 │  a spending conscience for agents                       [ Per-call $ ]  │
 │                                                         [  Run  ]       │
 ├──────────────────────────────┬────────────────────────────────────────┤

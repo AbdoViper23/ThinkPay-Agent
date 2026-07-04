@@ -1,13 +1,13 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { formatUsd } from "@mizan/shared";
-import { useMizan } from "@/lib/store";
+import { formatUsd } from "@thinkpay/shared";
+import { useThinkPay } from "@/lib/store";
 import { TIMING } from "@/lib/motion";
 
 /** Cold vs warm — the warm bar visibly stops short. Appears after the 2nd run. */
 export default function RunCompare() {
-  const runs = useMizan((s) => s.completedRuns);
+  const runs = useThinkPay((s) => s.completedRuns);
   const reduced = useReducedMotion() ?? false;
   if (runs.length < 2) return null;
 

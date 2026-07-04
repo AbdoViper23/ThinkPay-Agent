@@ -1,4 +1,4 @@
-# Mizan — a spending control plane for AI agents
+# ThinkPay — a spending control plane for AI agents
 
 **A CFO for your agent.** Give it a task and a budget; it decides whether each paid tool call is worth it, remembers which providers are cheap/fast/accurate, verifies it got what it paid for, and refuses to overspend.
 
@@ -6,7 +6,7 @@ Built for the **BTL Runtime Hackathon**. Reasoning runs on the **BTL Runtime**; 
 
 ## Why it matters
 
-Autonomous agents that can spend money need a control plane: something that decides when spending is allowed, blocks wasteful or duplicate purchases, escalates big spends for approval, and records every decision. Today's tools do budget caps *or* provider discovery — none combine spend guardrails with **agent-owned, cross-session learning** of which providers are actually worth paying, plus **per-call goal-verification**. Mizan does.
+Autonomous agents that can spend money need a control plane: something that decides when spending is allowed, blocks wasteful or duplicate purchases, escalates big spends for approval, and records every decision. Today's tools do budget caps *or* provider discovery — none combine spend guardrails with **agent-owned, cross-session learning** of which providers are actually worth paying, plus **per-call goal-verification**. ThinkPay does.
 
 ## The three layers (core idea)
 
@@ -16,7 +16,7 @@ Autonomous agents that can spend money need a control plane: something that deci
         ▼
  ┌──────────────┐   proposes paid calls    ┌───────────────────┐   allow/block/    ┌──────────────┐
  │  BRAIN        │ ───────────────────────▶ │  CONSCIENCE        │   escalate        │  HANDS        │
- │  BTL Runtime  │                          │  Mizan guardrails  │ ────────────────▶ │  x402 wallet  │
+ │  BTL Runtime  │                          │  ThinkPay guardrails  │ ────────────────▶ │  x402 wallet  │
  │  (LLM)        │ ◀─────────────────────── │  (deterministic)   │   pays USDC only  │  (viem)       │
  └──────────────┘   verified results only   └───────────────────┘   when allowed    └──────────────┘
 ```
@@ -39,7 +39,7 @@ Generate a throwaway wallet and fund it with Base Sepolia test USDC (Circle fauc
 ## Repo map
 
 ```
-mizan/
+thinkpay/
 ├─ CLAUDE.md              # ground truth for the coding agent — read first
 ├─ apps/
 │  ├─ agent/              # the loop, guardrails, verify, memory, x402 client, API+SSE

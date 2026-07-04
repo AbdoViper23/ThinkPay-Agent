@@ -1,4 +1,4 @@
-import type { ProviderStat, RunConfig, RunEvent } from "@mizan/shared";
+import type { ProviderStat, RunConfig, RunEvent } from "@thinkpay/shared";
 import type { ConnState } from "./store";
 
 /**

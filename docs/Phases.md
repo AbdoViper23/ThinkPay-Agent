@@ -24,7 +24,7 @@ Rule: **do not start a phase before the previous phase's checks pass.** If a che
 
 **Verify:**
 - [ ] `pnpm --filter agent test` → all 6 guardrail cases green (over-budget block, per-call escalate, duplicate→cache, backstop, no-progress, pay).
-- [ ] `sqlite3 mizan.db ".tables"` shows `providers runs decisions`.
+- [ ] `sqlite3 thinkpay.db ".tables"` shows `providers runs decisions`.
 - [ ] All 4 mock endpoints return 402 unpaid / 200 paid.
 
 ---
@@ -42,7 +42,7 @@ Rule: **do not start a phase before the previous phase's checks pass.** If a che
 
 ---
 
-## Phase 3 — Verify + memory = Mizan (3h)
+## Phase 3 — Verify + memory = ThinkPay (3h)
 **Do:** wire `btlJudge`, memory ranking + EMA updates, `db:seed` (2 good + 1 bad provider), point bad provider at `/liquidity-bad`.
 
 **Verify:**

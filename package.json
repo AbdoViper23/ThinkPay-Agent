@@ -1,8 +1,8 @@
 {
-  "name": "mizan",
+  "name": "thinkpay",
   "private": true,
   "version": "0.0.0",
-  "description": "Mizan — a spending control plane for AI agents (BTL Runtime + x402)",
+  "description": "ThinkPay — a spending control plane for AI agents (BTL Runtime + x402)",
   "packageManager": "pnpm@11.0.8",
   "engines": {
     "node": ">=20"

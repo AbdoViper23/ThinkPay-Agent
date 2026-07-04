@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { Decision, ProviderStat, RunEvent, RunTotals } from "@mizan/shared";
-import { dollarsToAtomic } from "@mizan/shared";
+import type { Decision, ProviderStat, RunEvent, RunTotals } from "@thinkpay/shared";
+import { dollarsToAtomic } from "@thinkpay/shared";
 import { sceneBus } from "./events";
 
 export type RunStatus = "idle" | "planning" | "running" | "awaiting_approval" | "done" | "error";
@@ -14,7 +14,7 @@ export interface CompletedRun {
   warm: boolean;
 }
 
-interface MizanStore {
+interface ThinkPayStore {
   mode: Mode;
   gfx: Gfx;
   runId: string | null;
@@ -50,7 +50,7 @@ interface MizanStore {
   reset: () => void;
 }
 
-export const useMizan = create<MizanStore>()((set, get) => ({
+export const useThinkPay = create<ThinkPayStore>()((set, get) => ({
   mode: (process.env.NEXT_PUBLIC_SIM_MODE ?? "1") !== "0" ? "sim" : "live",
   gfx: "auto",
   runId: null,
@@ -188,4 +188,4 @@ export const useMizan = create<MizanStore>()((set, get) => ({
 }));
 
 /** true while at least one escalation awaits the human */
-export const selectHasPending = (s: MizanStore) => Object.keys(s.pendingEscalations).length > 0;
+export const selectHasPending = (s: ThinkPayStore) => Object.keys(s.pendingEscalations).length > 0;

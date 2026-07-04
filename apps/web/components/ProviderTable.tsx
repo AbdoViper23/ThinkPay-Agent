@@ -1,15 +1,15 @@
 "use client";
 
 import { motion, useReducedMotion } from "motion/react";
-import { formatUsd } from "@mizan/shared";
-import { useMizan } from "@/lib/store";
+import { formatUsd } from "@thinkpay/shared";
+import { useThinkPay } from "@/lib/store";
 import { SPRING } from "@/lib/motion";
 
 const REJECT_FLOOR = 0.25;
 
 /** Provider memory — why the warm run skips the bad provider. Rows FLIP-reorder on refetch. */
 export default function ProviderTable() {
-  const providers = useMizan((s) => s.providers);
+  const providers = useThinkPay((s) => s.providers);
   const reduced = useReducedMotion() ?? false;
 
   const sorted = [...providers].sort((a, b) => {
@@ -29,7 +29,7 @@ export default function ProviderTable() {
       {sorted.length === 0 ? (
         <div className="flex flex-1 items-center px-5">
           <p className="font-sans text-[13px] leading-relaxed text-t-low">
-            No memory yet. After a run, Mizan remembers which providers were cheap, fast, and accurate — and ranks them next time.
+            No memory yet. After a run, ThinkPay remembers which providers were cheap, fast, and accurate — and ranks them next time.
           </p>
         </div>
       ) : (

@@ -2,10 +2,10 @@
 
 import { Fragment, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import type { Decision } from "@mizan/shared";
-import { formatUsd } from "@mizan/shared";
+import type { Decision } from "@thinkpay/shared";
+import { formatUsd } from "@thinkpay/shared";
 import { SPRING, TIMING, DUR } from "@/lib/motion";
-import { useMizan } from "@/lib/store";
+import { useThinkPay } from "@/lib/store";
 import { Stamp, HashResolve, MarkIcon, type MarkKind } from "./primitives";
 
 type Tone = "ok" | "bad" | "brass" | "mid";
@@ -29,8 +29,8 @@ const TONE_RULE: Record<Tone, string> = {
 export default function LedgerRow({ decision: d, instant }: { decision: Decision; instant: boolean }) {
   const reduced = useReducedMotion() ?? false;
   const skip = instant || reduced;
-  const runStartedAt = useMizan((s) => s.runStartedAt);
-  const hasPending = useMizan((s) => Object.keys(s.pendingEscalations).length > 0);
+  const runStartedAt = useThinkPay((s) => s.runStartedAt);
+  const hasPending = useThinkPay((s) => Object.keys(s.pendingEscalations).length > 0);
   const [open, setOpen] = useState(false);
 
   const v = verdictOf(d);

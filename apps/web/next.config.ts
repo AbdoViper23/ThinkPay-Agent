@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@mizan/shared"],
+  transpilePackages: ["@thinkpay/shared"],
 };
 
 export default nextConfig;

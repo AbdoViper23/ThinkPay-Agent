@@ -5,7 +5,7 @@
  * Run: pnpm --filter web exec tsx scripts/verify-sim.ts
  */
 import { simSource } from "../lib/simSource";
-import { useMizan } from "../lib/store";
+import { useThinkPay } from "../lib/store";
 
 const fail = (msg: string): never => {
   console.error(`✗ ${msg}`);
@@ -16,7 +16,7 @@ const ok = (msg: string) => console.log(`✓ ${msg}`);
 async function runOnce(expectWarm: boolean) {
   const cfg = { task: "t", budgetUsd: 0.25, perCallLimitUsd: 0.05 };
   const { runId } = await simSource.startRun(cfg);
-  useMizan.getState().beginRun(runId, cfg.budgetUsd, cfg.perCallLimitUsd, expectWarm);
+  useThinkPay.getState().beginRun(runId, cfg.budgetUsd, cfg.perCallLimitUsd, expectWarm);
 
   let approvedAt: number | null = null;
   await new Promise<void>((resolve, reject) => {
@@ -24,7 +24,7 @@ async function runOnce(expectWarm: boolean) {
     simSource.connect(
       runId,
       (e) => {
-        useMizan.getState().ingestEvent(e);
+        useThinkPay.getState().ingestEvent(e);
         if (e.type === "escalation") {
           // the human takes 1.2s to decide — script must genuinely block meanwhile
           approvedAt = Date.now();
@@ -45,7 +45,7 @@ async function main() {
 // ── cold run ─────────────────────────────────────────────────────────
 const t0 = Date.now();
 const { approvedAt } = await runOnce(false);
-const s1 = useMizan.getState();
+const s1 = useThinkPay.getState();
 
 if (s1.decisions.length !== 5) fail(`cold: expected 5 ledger rows, got ${s1.decisions.length}`);
 ok("cold: 5 decisions in the ledger");
@@ -78,7 +78,7 @@ ok("cold: state machine clean (done, no pending)");
 
 // ── warm run ─────────────────────────────────────────────────────────
 await runOnce(true);
-const s2 = useMizan.getState();
+const s2 = useThinkPay.getState();
 
 if (s2.decisions.some((d) => d.providerName === "Provider B")) fail("warm: Provider B must never be called");
 ok("warm: bad provider skipped entirely");

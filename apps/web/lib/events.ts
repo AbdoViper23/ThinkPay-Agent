@@ -1,4 +1,4 @@
-import type { RunEvent } from "@mizan/shared";
+import type { RunEvent } from "@thinkpay/shared";
 
 /**
  * sceneBus — a tiny pub/sub the three.js scene subscribes to.

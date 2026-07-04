@@ -1,4 +1,4 @@
-import type { Decision, ProviderStat, RunEvent, RunTotals } from "@mizan/shared";
+import type { Decision, ProviderStat, RunEvent, RunTotals } from "@thinkpay/shared";
 
 /**
  * Every demo number lives HERE and only here (docs/09 beats).

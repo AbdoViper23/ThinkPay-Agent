@@ -20,7 +20,7 @@ importers:
 
   apps/agent:
     dependencies:
-      '@mizan/shared':
+      '@thinkpay/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@x402/core':
@@ -57,7 +57,7 @@ importers:
 
   apps/mock-provider:
     dependencies:
-      '@mizan/shared':
+      '@thinkpay/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@x402/core':
@@ -91,7 +91,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@mizan/shared':
+      '@thinkpay/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       '@react-three/drei':

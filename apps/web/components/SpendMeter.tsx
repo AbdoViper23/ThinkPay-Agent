@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { formatUsd } from "@mizan/shared";
-import { useMizan } from "@/lib/store";
+import { formatUsd } from "@thinkpay/shared";
+import { useThinkPay } from "@/lib/store";
 import { SPRING, TIMING } from "@/lib/motion";
 import AnimatedUsd from "./AnimatedUsd";
 
@@ -13,12 +13,12 @@ import AnimatedUsd from "./AnimatedUsd";
  * the bar (it can't trip the cap). "Saved by memory" is the emotional payoff.
  */
 export default function SpendMeter() {
-  const decisions = useMizan((s) => s.decisions);
-  const live = useMizan((s) => s.live);
-  const totals = useMizan((s) => s.totals);
-  const budgetAtomic = useMizan((s) => s.budgetAtomic);
-  const runStatus = useMizan((s) => s.runStatus);
-  const completedRuns = useMizan((s) => s.completedRuns);
+  const decisions = useThinkPay((s) => s.decisions);
+  const live = useThinkPay((s) => s.live);
+  const totals = useThinkPay((s) => s.totals);
+  const budgetAtomic = useThinkPay((s) => s.budgetAtomic);
+  const runStatus = useThinkPay((s) => s.runStatus);
+  const completedRuns = useThinkPay((s) => s.completedRuns);
   const reduced = useReducedMotion() ?? false;
 
   const idle = runStatus === "idle" && decisions.length === 0;

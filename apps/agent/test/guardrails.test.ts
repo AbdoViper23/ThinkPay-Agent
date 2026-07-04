@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { dollarsToAtomic } from "@mizan/shared";
+import { dollarsToAtomic } from "@thinkpay/shared";
 import { evaluate, callKey } from "../src/guardrails";
 import type { PaidRequest, RunState } from "../src/guardrails";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useMizan } from "./store";
+import { useThinkPay } from "./store";
 import { refetchProviders } from "./runController";
 
 /** Boot-time wiring: fetch provider memory on mount. */
@@ -13,8 +13,8 @@ export function useProvidersOnMount() {
 
 /** Elapsed ms since run start, ticking — for the "running" button state. */
 export function useRunElapsed(): number | null {
-  const startedAt = useMizan((s) => s.runStartedAt);
-  const status = useMizan((s) => s.runStatus);
+  const startedAt = useThinkPay((s) => s.runStartedAt);
+  const status = useThinkPay((s) => s.runStatus);
   const running = status === "planning" || status === "running" || status === "awaiting_approval";
   const now = useTick(running ? 150 : null);
   if (!startedAt || !running) return null;

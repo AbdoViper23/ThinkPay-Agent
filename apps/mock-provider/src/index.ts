@@ -7,7 +7,7 @@ import express from "express";
 import { paymentMiddleware, x402ResourceServer } from "@x402/express";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { HTTPFacilitatorClient, type RouteConfig } from "@x402/core/server";
-import { CATALOG, formatUsd } from "@mizan/shared";
+import { CATALOG, formatUsd } from "@thinkpay/shared";
 
 const PORT = 4021;
 const NETWORK = "eip155:84532"; // Base Sepolia

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { useMizan } from "@/lib/store";
+import { useThinkPay } from "@/lib/store";
 import { useProvidersOnMount } from "@/lib/useRunStream";
 import { SPRING, DUR } from "@/lib/motion";
 import RunControls from "./RunControls";
@@ -24,8 +24,8 @@ const STEP_OF: Record<string, (typeof STEPS)[number]> = {
 };
 
 function StatusStepper() {
-  const runStatus = useMizan((s) => s.runStatus);
-  const error = useMizan((s) => s.error);
+  const runStatus = useThinkPay((s) => s.runStatus);
+  const error = useThinkPay((s) => s.error);
   const active = STEP_OF[runStatus] ?? "idle";
 
   if (runStatus === "error") {
@@ -103,7 +103,7 @@ export default function Dashboard() {
               </svg>
             </span>
             <div className="flex flex-col leading-none">
-              <span className="font-sans text-[15px] font-bold tracking-[-0.01em] text-t-hi">Mizan</span>
+              <span className="font-sans text-[15px] font-bold tracking-[-0.01em] text-t-hi">ThinkPay</span>
               <span className="mt-1 font-sans text-[11px] text-t-low">a spending conscience for agents</span>
             </div>
           </div>

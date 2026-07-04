@@ -19,7 +19,7 @@ Order is chosen so the **demo-critical path** exists early and everything after 
 - [ ] Ledger writes to SQLite.
 - **Milestone B:** a run completes end-to-end from a script, spends real test USDC through the guardrails, and writes a full decision trail. This is a working product even with no UI.
 
-## Hour 12–20 — Verify + memory (what makes it Mizan)
+## Hour 12–20 — Verify + memory (what makes it ThinkPay)
 
 - [ ] Verify judge (`btlJudge`) wired; failing results are dropped + provider accuracy drops.
 - [ ] `memory.ts` ranking + updates; `discover()` static catalog; `pnpm db:seed` with 2 good + 1 bad provider.

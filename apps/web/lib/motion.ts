@@ -20,7 +20,7 @@ export const SPRING = {
  * PAGE LOAD STORYBOARD  (run controls interactive from 120ms)
  *
  *    0ms   room lights come up: 3D key light 0 → full over 900ms
- *  120ms   header: scale glyph + MIZAN fade in
+ *  120ms   header: scale glyph + THINKPAY fade in
  *  280ms   ledger paper rises from bottom-right + warm halo blooms
  *  480ms   SpendMeter slides from left
  *  620ms   ProviderTable slides from left; rows stagger 40ms

@@ -1,16 +1,16 @@
-# CLAUDE.md — Mizan
+# CLAUDE.md — ThinkPay
 
 > This is the ground-truth context file for the project. The decisions here are **final for the hackathon**. Build against them directly; do not swap frameworks, package families, or the base architecture. If something below conflicts with a general habit, this file wins.
 
 ## What we are building
 
-**Mizan** — an **agent spending control plane**. It is a "CFO for an AI agent": given a task and a budget, the agent decides *whether a paid tool call is worth it*, remembers which paid providers were cheap/fast/accurate across sessions, verifies each paid result actually served the goal before building on it, and hard-stops runaway spend.
+**ThinkPay** — an **agent spending control plane**. It is a "CFO for an AI agent": given a task and a budget, the agent decides *whether a paid tool call is worth it*, remembers which paid providers were cheap/fast/accurate across sessions, verifies each paid result actually served the goal before building on it, and hard-stops runaway spend.
 
-Two cost ledgers run at once and Mizan trades them off:
+Two cost ledgers run at once and ThinkPay trades them off:
 1. **Reasoning cost** — LLM calls through the **BTL Runtime** (metered in credits).
 2. **Tool cost** — paid API calls over **x402** (USDC micro-payments on Base).
 
-The core belief: an autonomous agent that can spend money is only useful if it has **judgment and restraint**. Mizan is the deterministic layer that enforces that.
+The core belief: an autonomous agent that can spend money is only useful if it has **judgment and restraint**. ThinkPay is the deterministic layer that enforces that.
 
 ## The one non-negotiable architecture rule
 
@@ -18,7 +18,7 @@ The core belief: an autonomous agent that can spend money is only useful if it h
 
 1. **Brain** = BTL Runtime (LLM). Emits *decisions* as tool calls. Never sees the key, never signs.
 2. **Hands** = x402 client + wallet (plain TypeScript). Holds the key, signs USDC, pays on HTTP 402.
-3. **Conscience** = Mizan guardrails (deterministic code). Sits *between* brain and hands. Decides allow/block/escalate **before** any signature is created.
+3. **Conscience** = ThinkPay guardrails (deterministic code). Sits *between* brain and hands. Decides allow/block/escalate **before** any signature is created.
 
 The LLM proposes; deterministic code disposes. Even if the model is prompt-injected into "pay everything," the conscience layer refuses. **Never put the private key, seed, or wallet secret into any prompt, system message, tool description, or anything that reaches the model's context window.**
 
@@ -60,7 +60,7 @@ Every proposed paid call passes through ALL of these before the wallet is allowe
 
 Guardrails are pure functions returning `{ allow: boolean, reason: string, action: "pay" | "block" | "escalate" | "use_cache" }`. They must be unit-testable without any network.
 
-## The verify step (why Mizan is different)
+## The verify step (why ThinkPay is different)
 
 After every paid call, a **separate cheap LLM judge** (via BTL) answers: *"Did this response actually satisfy this sub-goal? yes/no + one-line reason."* If **no**, the result is flagged and **not built upon**, and the provider's `accuracy` score drops. This is what stops the agent from paying for and then trusting garbage.
 

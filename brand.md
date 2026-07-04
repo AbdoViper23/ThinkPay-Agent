@@ -1,4 +1,4 @@
-# Brand — Mizan
+# Brand — ThinkPay
 
 _Status: active_ · Source of truth: `docs/04-FRONTEND.md` + `apps/web/app/globals.css`
 

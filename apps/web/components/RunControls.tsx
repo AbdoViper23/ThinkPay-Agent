@@ -2,19 +2,19 @@
 
 import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { DEMO_TASK, DEMO_BUDGET_USD, DEMO_PER_CALL_USD } from "@mizan/shared";
-import { useMizan } from "@/lib/store";
+import { DEMO_TASK, DEMO_BUDGET_USD, DEMO_PER_CALL_USD } from "@thinkpay/shared";
+import { useThinkPay } from "@/lib/store";
 import { startRun } from "@/lib/runController";
 import { useRunElapsed } from "@/lib/useRunStream";
 import AnimatedUsd from "./AnimatedUsd";
 
 export default function RunControls() {
   const reduced = useReducedMotion() ?? false;
-  const mode = useMizan((s) => s.mode);
-  const setMode = useMizan((s) => s.setMode);
-  const runStatus = useMizan((s) => s.runStatus);
-  const runCount = useMizan((s) => s.runCount);
-  const spent = useMizan((s) => s.live.spentToolAtomic);
+  const mode = useThinkPay((s) => s.mode);
+  const setMode = useThinkPay((s) => s.setMode);
+  const runStatus = useThinkPay((s) => s.runStatus);
+  const runCount = useThinkPay((s) => s.runCount);
+  const spent = useThinkPay((s) => s.live.spentToolAtomic);
   const elapsed = useRunElapsed();
 
   const [task, setTask] = useState(DEMO_TASK);

@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { formatUsd } from "@mizan/shared";
-import { useMizan } from "@/lib/store";
+import { formatUsd } from "@thinkpay/shared";
+import { useThinkPay } from "@/lib/store";
 import { respondEscalation } from "@/lib/runController";
 import { SPRING, DUR } from "@/lib/motion";
 
@@ -12,8 +12,8 @@ import { SPRING, DUR } from "@/lib/motion";
  * proposed a call over the per-call limit; the human decides. A / D shortcuts.
  */
 export default function EscalationChip() {
-  const pending = useMizan((s) => s.pendingEscalations);
-  const decisions = useMizan((s) => s.decisions);
+  const pending = useThinkPay((s) => s.pendingEscalations);
+  const decisions = useThinkPay((s) => s.decisions);
   const reduced = useReducedMotion() ?? false;
   const approveRef = useRef<HTMLButtonElement>(null);
 

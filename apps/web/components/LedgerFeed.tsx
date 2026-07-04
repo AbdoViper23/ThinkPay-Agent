@@ -2,17 +2,17 @@
 
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { formatUsd } from "@mizan/shared";
-import { useMizan } from "@/lib/store";
+import { formatUsd } from "@thinkpay/shared";
+import { useThinkPay } from "@/lib/store";
 import { SPRING, TIMING } from "@/lib/motion";
 import LedgerRow from "./LedgerRow";
 import { TypeLine, Stamp } from "./primitives";
 
 export default function LedgerFeed() {
-  const decisions = useMizan((s) => s.decisions);
-  const statusNote = useMizan((s) => s.statusNote);
-  const runStatus = useMizan((s) => s.runStatus);
-  const totals = useMizan((s) => s.totals);
+  const decisions = useThinkPay((s) => s.decisions);
+  const statusNote = useThinkPay((s) => s.statusNote);
+  const runStatus = useThinkPay((s) => s.runStatus);
+  const totals = useThinkPay((s) => s.totals);
   const reduced = useReducedMotion() ?? false;
   const scrollRef = useRef<HTMLDivElement>(null);
 

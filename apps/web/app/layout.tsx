@@ -20,7 +20,7 @@ const grotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "Mizan — a spending conscience for agents",
+  title: "ThinkPay — a spending conscience for agents",
   description:
     "Give the agent a task and a budget. Watch it decide what's worth paying for.",
 };
