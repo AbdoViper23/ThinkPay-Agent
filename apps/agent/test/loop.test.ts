@@ -4,7 +4,7 @@
 // deterministically without any BTL key or funded wallet.
 import { describe, it, expect, vi, beforeEach, afterAll } from "vitest";
 import { eq } from "drizzle-orm";
-import { db, decisions, runs } from "@thinkpay/shared/db/client";
+import { db, decisions, runs, providers } from "@thinkpay/shared/db/client";
 import { dollarsToAtomic } from "@thinkpay/shared";
 
 const h = vi.hoisted(() => ({
@@ -101,8 +101,29 @@ describe("runLoop (offline, mocked brain + signer)", () => {
     expect(cached[0]!.savedAtomic).toBe(dollarsToAtomic(0.008));
     expect(totals.savedByCacheAtomic).toBe(dollarsToAtomic(0.008));
     expect(totals.toolAtomic).toBe(dollarsToAtomic(0.008));
+    // saved-by-memory: naive baseline (2 holders sub-goals × $0.008) minus $0.008 actually spent
+    expect(totals.savedByMemoryAtomic).toBe(dollarsToAtomic(0.008));
     // both BTL turns + plan + compose recorded reasoning cost
     expect(totals.reasoningMicros).toBeGreaterThan(0);
+  });
+
+  it("records the paid outcome into provider memory (timesUsed + lastUsed)", async () => {
+    h.plan.mockResolvedValueOnce({
+      subGoals: [{ id: "s1", text: "holders of XYZ", capability: "holders" }],
+      costMicros: 100,
+    });
+    h.turnQueue.push(toolMsg("get_holders", { query: "mem-update" }), answerMsg("done"));
+
+    const endpoint = "http://localhost:4021/holders";
+    const before = db.select().from(providers).where(eq(providers.endpoint, endpoint)).get();
+
+    const run = startRun(0.25);
+    await runLoop(run, { task: "test", budgetUsd: 0.25, perCallLimitUsd: 0.05 });
+
+    const after = db.select().from(providers).where(eq(providers.endpoint, endpoint)).get();
+    expect(after).toBeDefined();
+    expect(after!.timesUsed).toBe((before?.timesUsed ?? 0) + 1); // exactly one real payment learned
+    expect(after!.lastUsed).not.toBeNull();
   });
 
   it("blocks a paid call that would exceed the total budget (cap works, wallet untouched)", async () => {

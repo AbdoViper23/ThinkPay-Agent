@@ -14,7 +14,8 @@
     "smoke:x402": "pnpm --filter agent smoke:x402",
     "agent:run": "pnpm --filter agent demo",
     "db:push": "drizzle-kit push",
-    "db:seed": "tsx packages/shared/src/db/seed.ts"
+    "db:seed": "tsx packages/shared/src/db/seed.ts",
+    "db:seed:cold": "tsx packages/shared/src/db/seed-cold.ts"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.0",

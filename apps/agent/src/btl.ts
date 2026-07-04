@@ -36,6 +36,10 @@ function stripFence(s: string): string {
   return s.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
 }
 
+function truncate(s: string, n: number): string {
+  return s.length > n ? s.slice(0, n) : s;
+}
+
 const PLAN_SYSTEM =
   "You are a planning module for an on-chain research agent. Decompose the task into 1-4 ordered sub-goals. " +
   "Tag each sub-goal with the paid capability it needs: 'holders', 'liquidity', or 'audit'; use null if it can be " +
@@ -124,10 +128,36 @@ export async function compose(task: string, results: string[]): Promise<{ text: 
 }
 
 /**
- * Verify judge — Phase 2 STUB. Always passes.
- * Phase 3 swaps this body for a real `btlJudge` (JUDGE_MODEL, temperature 0, strict JSON).
- * Signature is intentionally the final one so the loop never changes.
+ * Verify judge (docs/06) — a cheap, strict QA judge that answers whether a paid result actually
+ * satisfied the sub-goal. A `false` verdict is the anti-garbage beat: the loop drops the result and
+ * lowers the provider's accuracy. Judge cost is negligible and left untracked to keep this signature
+ * final (the loop never changes). `response` is expected pre-stringified; we truncate defensively.
  */
-export async function verify(_subGoal: string, _response: string): Promise<{ ok: boolean; reason: string }> {
-  return { ok: true, reason: "verify stubbed (Phase 3)" };
+export async function verify(subGoal: string, response: string): Promise<{ ok: boolean; reason: string }> {
+  const { data } = await btl()
+    .chat.completions.create({
+      model: JUDGE_MODEL,
+      temperature: 0,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: "You are a strict QA judge. Answer only compact JSON." },
+        {
+          role: "user",
+          content:
+            `Sub-goal: ${subGoal}\n\nResponse to judge:\n${truncate(response, 2000)}\n\n` +
+            `Did the response actually satisfy the sub-goal? Reply JSON: {"ok": boolean, "reason": string}`,
+        },
+      ],
+    })
+    .withResponse();
+  try {
+    const parsed = JSON.parse(stripFence(data.choices[0]?.message?.content ?? "{}")) as {
+      ok?: unknown;
+      reason?: unknown;
+    };
+    return { ok: parsed.ok === true, reason: typeof parsed.reason === "string" ? parsed.reason : "" };
+  } catch {
+    // Unparseable judge output → treat as a failed verify (do not build on it).
+    return { ok: false, reason: "judge returned unparseable output" };
+  }
 }

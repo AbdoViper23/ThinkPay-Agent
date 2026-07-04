@@ -2,10 +2,11 @@
 // The LLM PROPOSES tool calls; deterministic guardrails DISPOSE; pay() (sole signer) EXECUTES.
 // Verify is stubbed (Phase 3 wires the real judge + memory EMA + provider ranking).
 import OpenAI from "openai";
+import { maxPriceForCapability } from "@thinkpay/shared";
 import type { Decision, RunConfig, RunTotals } from "@thinkpay/shared";
 import { chatTurn, compose, plan, verify } from "./btl";
 import { TOOL_TO_CAPABILITY, buildToolCall, isPaidTool, type ToolCall } from "./tools";
-import { chooseProvider } from "./memory";
+import { chooseProvider, update } from "./memory";
 import { callKey, evaluate, type PaidRequest, type RunState } from "./guardrails";
 import { writeDecision, updateDecision, type RunRecord } from "./ledger";
 import { pay, PaymentError } from "./pay/x402";
@@ -186,6 +187,9 @@ export async function runLoop(run: RunRecord, config: RunConfig): Promise<LoopRe
           calls++;
 
           const verdict = await verify(subGoal.text, JSON.stringify(result.data));
+          // Learn from this paid outcome (EMA accuracy + cost/latency means). A verify=false
+          // verdict drops the provider's accuracy so ranking demotes/floors it on the warm run.
+          update(provider.endpoint, { costAtomic: result.costAtomic, latencyMs: result.latencyMs, ok: verdict.ok });
           const paidPatch = {
             guardrail: "pay" as const,
             paidCostAtomic: result.costAtomic,
@@ -230,11 +234,19 @@ export async function runLoop(run: RunRecord, config: RunConfig): Promise<LoopRe
   const { text: report, costMicros: composeMicros } = await compose(config.task, verifiedResults);
   reasoningMicros += composeMicros;
 
+  // "Saved by memory" (docs/05): deterministic post-hoc baseline − actual tool spend. The baseline is
+  // a naive agent paying the MOST EXPENSIVE catalog provider once per sub-goal (no dedupe, no skip).
+  const baselineAtomic = subGoals.reduce(
+    (sum, sg) => sum + (sg.capability ? maxPriceForCapability(sg.capability) : 0),
+    0,
+  );
+  const savedByMemoryAtomic = Math.max(0, baselineAtomic - state.spentAtomic);
+
   const totals: RunTotals = {
     reasoningMicros,
     toolAtomic: state.spentAtomic,
     savedByCacheAtomic,
-    savedByMemoryAtomic: 0, // Phase 3: deterministic baseline − tool spend
+    savedByMemoryAtomic,
     calls,
     rejections,
     escalations,

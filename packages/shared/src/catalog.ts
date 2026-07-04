@@ -24,3 +24,12 @@ export const CATALOG: CatalogEntry[] = [
 /** All catalog entries for a capability (used by discover() and the saved-by-memory baseline). */
 export const catalogFor = (capability: Capability): CatalogEntry[] =>
   CATALOG.filter((e) => e.capability === capability);
+
+/**
+ * Most expensive catalog price for a capability — the per-sub-goal cost a naive agent would pay.
+ * Basis of the deterministic "saved by memory" baseline (docs/05). 0 if no provider exists.
+ */
+export const maxPriceForCapability = (capability: Capability): number => {
+  const prices = catalogFor(capability).map((e) => e.priceAtomic);
+  return prices.length ? Math.max(...prices) : 0;
+};
