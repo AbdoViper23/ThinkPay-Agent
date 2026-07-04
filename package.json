@@ -1,0 +1,15 @@
+{
+  "name": "mizan",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Mizan — a spending control plane for AI agents (BTL Runtime + x402)",
+  "packageManager": "pnpm@11.0.8",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "mock": "pnpm --filter mock-provider dev",
+    "smoke:btl": "pnpm --filter agent smoke:btl",
+    "smoke:x402": "pnpm --filter agent smoke:x402"
+  }
+}
