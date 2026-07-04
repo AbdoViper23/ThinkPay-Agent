@@ -12,6 +12,7 @@
     "web": "pnpm --filter web dev",
     "smoke:btl": "pnpm --filter agent smoke:btl",
     "smoke:x402": "pnpm --filter agent smoke:x402",
+    "agent:run": "pnpm --filter agent demo",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx packages/shared/src/db/seed.ts"
   },
