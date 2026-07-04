@@ -16,7 +16,7 @@ const ok = (msg: string) => console.log(`✓ ${msg}`);
 async function runOnce(expectWarm: boolean) {
   const cfg = { task: "t", budgetUsd: 0.25, perCallLimitUsd: 0.05 };
   const { runId } = await simSource.startRun(cfg);
-  useThinkPay.getState().beginRun(runId, cfg.budgetUsd, cfg.perCallLimitUsd, expectWarm);
+  useThinkPay.getState().beginRun(runId, cfg.budgetUsd, cfg.perCallLimitUsd);
 
   let approvedAt: number | null = null;
   await new Promise<void>((resolve, reject) => {

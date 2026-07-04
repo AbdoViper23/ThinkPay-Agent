@@ -9,6 +9,7 @@
   },
   "scripts": {
     "mock": "pnpm --filter mock-provider dev",
+    "agent": "pnpm --filter agent dev",
     "web": "pnpm --filter web dev",
     "smoke:btl": "pnpm --filter agent smoke:btl",
     "smoke:x402": "pnpm --filter agent smoke:x402",

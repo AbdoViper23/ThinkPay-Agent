@@ -1,9 +1,10 @@
-// The agent loop (docs/03) — Hybrid model, console-only for Phase 2.
-// The LLM PROPOSES tool calls; deterministic guardrails DISPOSE; pay() (sole signer) EXECUTES.
-// Verify is stubbed (Phase 3 wires the real judge + memory EMA + provider ranking).
+// The agent loop (docs/03) — Hybrid model. The LLM PROPOSES tool calls; deterministic guardrails
+// DISPOSE; pay() (sole signer) EXECUTES. Real verify judge + memory EMA/ranking (Phase 3).
+// Optional RunHooks (Phase 4) stream RunEvents and suspend on human escalation approval; omitted by
+// the console runner + tests, which fall back to silent + auto-approve behavior.
 import OpenAI from "openai";
 import { maxPriceForCapability } from "@thinkpay/shared";
-import type { Decision, RunConfig, RunTotals } from "@thinkpay/shared";
+import type { Decision, RunConfig, RunEvent, RunTotals } from "@thinkpay/shared";
 import { chatTurn, compose, plan, verify } from "./btl";
 import { TOOL_TO_CAPABILITY, buildToolCall, isPaidTool, type ToolCall } from "./tools";
 import { chooseProvider, update } from "./memory";
@@ -28,6 +29,17 @@ export interface LoopResult {
   report: string;
 }
 
+/**
+ * Optional streaming/approval hooks (Phase 4). The console runner and tests omit them:
+ * no `emit` → silent; no `awaitApproval` → escalations auto-approve (console behavior).
+ * The server passes `emit` to fan RunEvents to SSE clients and `awaitApproval` to suspend
+ * on a human decision (POST /run/:id/approve).
+ */
+export interface RunHooks {
+  emit?: (e: RunEvent) => void;
+  awaitApproval?: (decisionId: string, reason: string) => Promise<boolean>;
+}
+
 function functionCalls(msg: OpenAI.Chat.Completions.ChatCompletionMessage): ToolCall[] {
   return (msg.tool_calls ?? [])
     .filter((tc): tc is Extract<typeof tc, { type: "function" }> => tc.type === "function")
@@ -43,7 +55,7 @@ function parseArgs(raw: string): Record<string, unknown> {
   }
 }
 
-export async function runLoop(run: RunRecord, config: RunConfig): Promise<LoopResult> {
+export async function runLoop(run: RunRecord, config: RunConfig, hooks?: RunHooks): Promise<LoopResult> {
   const state: RunState = {
     budgetAtomic: run.budgetAtomic,
     spentAtomic: 0,
@@ -55,6 +67,10 @@ export async function runLoop(run: RunRecord, config: RunConfig): Promise<LoopRe
     maxNoProgress: MAX_NO_PROGRESS,
   };
 
+  const emit = (e: RunEvent): void => hooks?.emit?.(e);
+  const emitDecision = (d: Decision): void => emit({ type: "decision", data: d });
+  const emitUpdate = (d: Decision): void => emit({ type: "decision:update", data: d });
+
   let reasoningMicros = 0;
   let savedByCacheAtomic = 0;
   let calls = 0;
@@ -62,8 +78,10 @@ export async function runLoop(run: RunRecord, config: RunConfig): Promise<LoopRe
   let escalations = 0;
   const verifiedResults: string[] = [];
 
+  emit({ type: "status", data: { state: "planning" } });
   const { subGoals, costMicros: planMicros } = await plan(config.task);
   reasoningMicros += planMicros;
+  emit({ type: "status", data: { state: "running", note: `plan: ${subGoals.length} sub-goals` } });
   console.log(`\n▸ plan: ${subGoals.length} sub-goals`);
   for (const sg of subGoals) console.log(`   - [${sg.capability ?? "free"}] ${sg.text}`);
 
@@ -138,13 +156,15 @@ export async function runLoop(run: RunRecord, config: RunConfig): Promise<LoopRe
         if (gate.action === "use_cache") {
           const cached = state.paidCalls.get(gate.cachedKey);
           savedByCacheAtomic += req.estCostAtomic;
-          writeDecision({
+          const row: Decision = {
             ...base,
             guardrail: "use_cache",
             savedAtomic: req.estCostAtomic,
             verifyOk: true,
             verifyReason: "served from cache (already paid this run)",
-          });
+          };
+          writeDecision(row);
+          emitDecision(row);
           console.log(`   ↩ use_cache  ${provider.name} (${capability})  saved ${req.estCostAtomic}`);
           toolReply = JSON.stringify(cached ?? {});
           messages.push({ role: "tool", tool_call_id: tc.id, content: toolReply });
@@ -153,7 +173,9 @@ export async function runLoop(run: RunRecord, config: RunConfig): Promise<LoopRe
 
         if (gate.action === "block") {
           rejections++;
-          writeDecision({ ...base, guardrail: "block", guardrailReason: gate.reason });
+          const row: Decision = { ...base, guardrail: "block", guardrailReason: gate.reason };
+          writeDecision(row);
+          emitDecision(row);
           console.log(`   ✗ block  ${provider.name} (${capability})  — ${gate.reason}`);
           messages.push({ role: "tool", tool_call_id: tc.id, content: `blocked: ${gate.reason}` });
           continue;
@@ -162,24 +184,50 @@ export async function runLoop(run: RunRecord, config: RunConfig): Promise<LoopRe
         let escalated = false;
         if (gate.action === "escalate") {
           escalations++;
-          // Mint + persist the pending row BEFORE resolving (Phase 4 streams it and awaits a human).
-          writeDecision({ ...base, guardrail: "pending", guardrailReason: gate.reason });
-          console.log(`   ⚑ escalate ${provider.name} (${capability}) — ${gate.reason}  → console auto-approve`);
-          // Console mode has no human approver → auto-approve (Phases.md line 33). Budget STILL enforced.
+          const reason = gate.reason;
+          // Mint + persist + STREAM the pending row, then the escalation, BEFORE awaiting a human.
+          const pendingRow: Decision = { ...base, guardrail: "pending", guardrailReason: reason };
+          writeDecision(pendingRow);
+          emitDecision(pendingRow);
+          emit({ type: "escalation", data: { decisionId, reason } });
+          escalated = true;
+
+          // No approver (console/tests) → auto-approve (Phases.md line 33). The server suspends here
+          // until POST /run/:id/approve (or a 60s auto-deny).
+          const approved = hooks?.awaitApproval ? await hooks.awaitApproval(decisionId, reason) : true;
+          console.log(`   ⚑ escalate ${provider.name} (${capability}) — ${reason}  → ${approved ? "approved" : "denied"}`);
+
+          if (!approved) {
+            rejections++;
+            const patch = { guardrail: "block" as const, guardrailReason: "denied by human" };
+            updateDecision(decisionId, patch);
+            emitUpdate({ ...pendingRow, ...patch });
+            messages.push({ role: "tool", tool_call_id: tc.id, content: "blocked: denied by human" });
+            continue;
+          }
+
+          // Approved → the per-call rule is skipped, but the HARD budget cap (#1) still applies.
           req.approved = true;
           gate = evaluate(req, state);
-          escalated = true;
           if (gate.action !== "pay") {
-            const reason = gate.action === "block" ? gate.reason : "not payable after approval";
+            const blockReason = gate.action === "block" ? gate.reason : "not payable after approval";
             rejections++;
-            updateDecision(decisionId, { guardrail: "block", guardrailReason: reason });
-            console.log(`   ✗ block (post-approval)  — ${reason}`);
-            messages.push({ role: "tool", tool_call_id: tc.id, content: `blocked: ${reason}` });
+            const patch = { guardrail: "block" as const, guardrailReason: blockReason };
+            updateDecision(decisionId, patch);
+            emitUpdate({ ...pendingRow, ...patch });
+            console.log(`   ✗ block (post-approval)  — ${blockReason}`);
+            messages.push({ role: "tool", tool_call_id: tc.id, content: `blocked: ${blockReason}` });
             continue;
           }
         }
 
-        // gate.action === "pay"
+        // gate.action === "pay". Stream the row NOW (as "paying…"): a paid call splits into
+        // write+update so the UI shows it the moment work starts (acceptance #1). The escalated
+        // path already wrote+emitted its pending row above — just update that one.
+        if (!escalated) {
+          writeDecision(base);
+          emitDecision(base);
+        }
         try {
           const result = await pay(req);
           state.spentAtomic += result.costAtomic;
@@ -197,8 +245,8 @@ export async function runLoop(run: RunRecord, config: RunConfig): Promise<LoopRe
             verifyOk: verdict.ok,
             verifyReason: verdict.reason,
           };
-          if (escalated) updateDecision(decisionId, paidPatch);
-          else writeDecision({ ...base, ...paidPatch });
+          updateDecision(decisionId, paidPatch);
+          emitUpdate({ ...base, ...paidPatch });
 
           console.log(
             `   ${verdict.ok ? "✓" : "✗"} pay  ${provider.name} (${capability})  cost ${result.costAtomic}` +
@@ -220,8 +268,8 @@ export async function runLoop(run: RunRecord, config: RunConfig): Promise<LoopRe
           rejections++;
           state.noProgressStreak++;
           const patch = { guardrail: "block" as const, guardrailReason: `payment error: ${msgText}` };
-          if (escalated) updateDecision(decisionId, patch);
-          else writeDecision({ ...base, ...patch });
+          updateDecision(decisionId, patch);
+          emitUpdate({ ...base, ...patch });
           console.log(`   ✗ payment error  ${provider.name} (${capability}) — ${msgText}`);
           toolReply = `payment failed: ${msgText}`;
         }

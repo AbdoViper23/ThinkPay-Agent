@@ -147,6 +147,30 @@ export function rankProviders(capability: Capability): ProviderStat[] {
 }
 
 /**
+ * Every known provider, scored + ranked WITHIN its capability, best-first — but WITHOUT the reject
+ * floor drop. This is the read model for GET /providers: the dashboard must still SEE the demoted
+ * bad provider (rank 2, "avoid"), whereas rankProviders() drops it so the loop never PAYS it.
+ */
+export function allProvidersRanked(): ProviderStat[] {
+  const rows = db.select().from(providers).all().map(rowToStat);
+  const byCap = new Map<Capability, ProviderStat[]>();
+  for (const p of rows) {
+    const list = byCap.get(p.capability) ?? [];
+    list.push(p);
+    byCap.set(p.capability, list);
+  }
+  const out: ProviderStat[] = [];
+  for (const peers of byCap.values()) {
+    const scored = peers
+      .map((p) => ({ ...p, score: score(p, peers) }))
+      .sort((a, b) => (b.score ?? 0) - (a.score ?? 0))
+      .map((p, i) => ({ ...p, rank: i + 1 }));
+    out.push(...scored);
+  }
+  return out;
+}
+
+/**
  * Choose which provider to pay for a capability. Memory wins if it has candidates; discover()
  * is the safety net. This is the loop's only touchpoint — the warm-run advantage lives here.
  */

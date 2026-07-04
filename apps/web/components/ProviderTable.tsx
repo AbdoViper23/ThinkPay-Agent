@@ -34,10 +34,13 @@ export default function ProviderTable() {
         </div>
       ) : (
         <div className="min-h-0 flex-1 overflow-y-auto px-2 py-2">
-          <div className="grid grid-cols-[1fr_52px_38px] gap-2 px-3 pb-2 pt-1">
+          <div className="grid grid-cols-[18px_1fr_42px_50px_34px_28px] gap-1.5 px-3 pb-2 pt-1">
+            <span className="card-label !text-[9.5px] text-right">#</span>
             <span className="card-label !text-[9.5px]">Provider</span>
+            <span className="card-label !text-[9.5px] text-right">Lat</span>
             <span className="card-label !text-[9.5px] text-right">Cost</span>
             <span className="card-label !text-[9.5px] text-right">Acc</span>
+            <span className="card-label !text-[9.5px] text-right">Use</span>
           </div>
           {sorted.map((p) => {
             const bad = p.accuracyScore < REJECT_FLOOR;
@@ -46,23 +49,29 @@ export default function ProviderTable() {
                 key={p.endpoint}
                 layout={!reduced}
                 transition={SPRING.reorder}
-                className={`relative grid grid-cols-[1fr_52px_38px] items-center gap-2 rounded-row px-3 py-2.5 ${
+                className={`relative grid grid-cols-[18px_1fr_42px_50px_34px_28px] items-center gap-1.5 rounded-row px-3 py-2.5 ${
                   bad ? "opacity-65" : ""
                 }`}
               >
-                <span className="flex items-center gap-2 min-w-0">
-                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${bad ? "bg-bad" : p.rank === 1 ? "bg-brass" : "bg-t-faint"}`} />
-                  <span className="min-w-0">
-                    <span className={`block truncate font-sans text-[12.5px] ${bad ? "text-t-mid" : "text-t-hi"}`}>{p.name}</span>
-                    <span className="block truncate font-mono text-[10px] text-t-low">
-                      {p.capability} · {(p.avgLatencyMs / 1000).toFixed(1)}s{bad ? " · avoid" : p.rank === 1 ? " · best" : ""}
-                    </span>
+                <span
+                  className={`text-right font-mono text-[12px] tabular-nums ${
+                    bad ? "text-bad-bright" : p.rank === 1 ? "text-brass" : "text-t-low"
+                  }`}
+                >
+                  {p.rank ?? "—"}
+                </span>
+                <span className="min-w-0">
+                  <span className={`block truncate font-sans text-[12.5px] ${bad ? "text-t-mid" : "text-t-hi"}`}>{p.name}</span>
+                  <span className="block truncate font-mono text-[10px] text-t-low">
+                    {p.capability}{bad ? " · avoid" : p.rank === 1 ? " · best" : ""}
                   </span>
                 </span>
-                <span className="text-right font-mono text-[12px] text-t-mid">{formatUsd(p.avgCostAtomic)}</span>
-                <span className={`text-right font-mono text-[12px] ${bad ? "text-bad-bright" : "text-ok-bright"}`}>
+                <span className="text-right font-mono text-[11px] text-t-mid tabular-nums">{(p.avgLatencyMs / 1000).toFixed(1)}s</span>
+                <span className="text-right font-mono text-[11px] text-t-mid tabular-nums">{formatUsd(p.avgCostAtomic)}</span>
+                <span className={`text-right font-mono text-[11px] tabular-nums ${bad ? "text-bad-bright" : "text-ok-bright"}`}>
                   {p.accuracyScore.toFixed(2)}
                 </span>
+                <span className="text-right font-mono text-[11px] text-t-low tabular-nums">{p.timesUsed}</span>
               </motion.div>
             );
           })}

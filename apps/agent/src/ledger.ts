@@ -69,6 +69,11 @@ export function updateDecision(id: string, patch: Partial<Decision>): void {
   db.update(decisions).set(set).where(eq(decisions.id, id)).run();
 }
 
+/** Update just a run's lifecycle status (e.g. "awaiting_approval" while suspended on an escalation). */
+export function setRunStatus(runId: string, status: string): void {
+  db.update(runs).set({ status }).where(eq(runs.id, runId)).run();
+}
+
 /** Finalize a run with its totals. */
 export function finishRun(runId: string, totals: RunTotals, status: "done" | "error" = "done"): void {
   db.update(runs)

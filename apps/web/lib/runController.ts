@@ -6,7 +6,7 @@ import { liveSource } from "./liveSource";
 
 /**
  * Plain functions bound to the store (no hook lifecycle bugs).
- * Components call these; the store + sceneBus fan the results out.
+ * Components call these; the store fans the results out.
  */
 
 let disconnect: (() => void) | null = null;
@@ -25,8 +25,7 @@ export async function startRun(cfg: RunConfig): Promise<void> {
 
   try {
     const { runId } = await source.startRun(cfg);
-    const warm = s.mode === "sim" && s.runCount >= 1;
-    useThinkPay.getState().beginRun(runId, cfg.budgetUsd, cfg.perCallLimitUsd, warm);
+    useThinkPay.getState().beginRun(runId, cfg.budgetUsd, cfg.perCallLimitUsd);
     disconnect = source.connect(
       runId,
       (e) => useThinkPay.getState().ingestEvent(e),

@@ -3,16 +3,29 @@
 import { useEffect, useRef } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { formatUsd } from "@thinkpay/shared";
+import type { RunTotals } from "@thinkpay/shared";
 import { useThinkPay } from "@/lib/store";
 import { SPRING, TIMING } from "@/lib/motion";
 import LedgerRow from "./LedgerRow";
-import { TypeLine, Stamp } from "./primitives";
+import { TypeLine, Stamp, type Tone } from "./primitives";
+
+/** The run-complete stamp reflects the actual outcome — not a hardcoded "Balanced". */
+function runVerdict(totals: RunTotals, budgetAtomic: number): { text: string; tone: Tone; box: string } {
+  if (budgetAtomic > 0 && totals.toolAtomic > budgetAtomic) {
+    return { text: "Over budget", tone: "bad", box: "border-bad text-bad-bright" };
+  }
+  if (totals.rejections > 0) {
+    return { text: `${totals.rejections} flagged`, tone: "bad", box: "border-bad text-bad-bright" };
+  }
+  return { text: "Balanced", tone: "brass", box: "border-brass-dim text-brass-bright" };
+}
 
 export default function LedgerFeed() {
   const decisions = useThinkPay((s) => s.decisions);
   const statusNote = useThinkPay((s) => s.statusNote);
   const runStatus = useThinkPay((s) => s.runStatus);
   const totals = useThinkPay((s) => s.totals);
+  const budgetAtomic = useThinkPay((s) => s.budgetAtomic);
   const reduced = useReducedMotion() ?? false;
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -25,6 +38,7 @@ export default function LedgerFeed() {
   const isInstant = (createdAt: number) => now - createdAt > 2000;
   const idle = runStatus === "idle" && decisions.length === 0;
   const live = runStatus === "planning" || runStatus === "running" || runStatus === "awaiting_approval";
+  const verdict = totals ? runVerdict(totals, budgetAtomic) : null;
 
   return (
     <section className="card flex h-full flex-col overflow-hidden" aria-label="Decision ledger">
@@ -66,7 +80,7 @@ export default function LedgerFeed() {
           </AnimatePresence>
         )}
 
-        {runStatus === "done" && totals && (
+        {runStatus === "done" && totals && verdict && (
           <motion.footer
             className="mx-2 mb-1 mt-3 rounded-ctl border border-line bg-bg-2 p-4"
             initial={reduced ? { opacity: 0 } : { opacity: 0, y: 8 }}
@@ -75,9 +89,9 @@ export default function LedgerFeed() {
           >
             <div className="flex items-center justify-between">
               <span className="card-label">Run complete</span>
-              <Stamp tone="brass" delay={reduced ? 0 : TIMING.done.seal}>
-                <span className="inline-block rounded border border-brass-dim px-2 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] text-brass-bright">
-                  Balanced
+              <Stamp tone={verdict.tone} delay={reduced ? 0 : TIMING.done.seal}>
+                <span className={`inline-block rounded border px-2 py-0.5 font-mono text-[9.5px] font-semibold uppercase tracking-[0.16em] ${verdict.box}`}>
+                  {verdict.text}
                 </span>
               </Stamp>
             </div>

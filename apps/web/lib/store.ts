@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import type { Decision, ProviderStat, RunEvent, RunTotals } from "@thinkpay/shared";
 import { dollarsToAtomic } from "@thinkpay/shared";
-import { sceneBus } from "./events";
 
 export type RunStatus = "idle" | "planning" | "running" | "awaiting_approval" | "done" | "error";
 export type ConnState = "idle" | "connecting" | "open" | "closed" | "error";
@@ -44,7 +43,7 @@ interface ThinkPayStore {
   setGfx: (g: Gfx) => void;
   setConnection: (c: ConnState) => void;
   setProviders: (p: ProviderStat[]) => void;
-  beginRun: (runId: string, budgetUsd: number, perCallLimitUsd: number, warm: boolean) => void;
+  beginRun: (runId: string, budgetUsd: number, perCallLimitUsd: number) => void;
   ingestEvent: (e: RunEvent) => void;
   failRun: (message: string) => void;
   reset: () => void;
@@ -79,7 +78,7 @@ export const useThinkPay = create<ThinkPayStore>()((set, get) => ({
   setConnection: (connection) => set({ connection }),
   setProviders: (providers) => set({ providers }),
 
-  beginRun: (runId, budgetUsd, perCallLimitUsd, warm) => {
+  beginRun: (runId, budgetUsd, perCallLimitUsd) => {
     set({
       runId,
       runCount: get().runCount + 1,
@@ -95,7 +94,6 @@ export const useThinkPay = create<ThinkPayStore>()((set, get) => ({
       totals: null,
       error: null,
     });
-    if (warm) sceneBus.emit({ kind: "warm" });
   },
 
   ingestEvent: (e) => {
@@ -167,8 +165,6 @@ export const useThinkPay = create<ThinkPayStore>()((set, get) => ({
         break;
       }
     }
-    // re-emit for the 3D room AFTER the store mutation
-    sceneBus.emit({ kind: "run", event: e });
   },
 
   failRun: (message) => set({ runStatus: "error", error: message }),
