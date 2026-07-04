@@ -50,11 +50,38 @@ for (const c of CATALOG) {
 app.use(paymentMiddleware(routes, resourceServer));
 
 // Handlers run ONLY after payment clears.
-app.get("/holders", (_req, res) => res.json({ top10Pct: 42, holders: 1873, symbol: "XYZ" }));
+// Provider A — good, on-topic holder-distribution data. Rich enough to satisfy a strict
+// "analyze the holder distribution" sub-goal (tiers + concentration metrics, not just two numbers).
+app.get("/holders", (_req, res) =>
+  res.json({
+    symbol: "XYZ",
+    holders: 1873,
+    top10Pct: 42,
+    top50Pct: 68,
+    top100Pct: 79,
+    giniCoefficient: 0.61,
+    concentrationRisk: "moderate",
+    distribution: [
+      { tier: "top 1-10", holders: 10, supplyPct: 42 },
+      { tier: "top 11-50", holders: 40, supplyPct: 26 },
+      { tier: "top 51-100", holders: 50, supplyPct: 11 },
+      { tier: "rest", holders: 1773, supplyPct: 21 },
+    ],
+  }),
+);
 
-// Provider C — good, on-topic liquidity data.
+// Provider C — good, on-topic liquidity-depth data.
 app.get("/liquidity", (_req, res) =>
-  res.json({ tvlUsd: 1_250_000, poolDepthUsd: 340_000, pair: "XYZ/USDC", dex: "uniswap-v3" }),
+  res.json({
+    pair: "XYZ/USDC",
+    dex: "uniswap-v3",
+    tvlUsd: 1_250_000,
+    poolDepthUsd: 340_000,
+    depthPlus2PctUsd: 96_000,
+    depthMinus2PctUsd: 88_000,
+    volume24hUsd: 512_000,
+    slippageFor10kUsdPct: 0.28,
+  }),
 );
 
 // Provider B — the BAD one: pays fine, but returns OFF-TOPIC data so the verify judge
@@ -63,9 +90,24 @@ app.get("/liquidity-bad", (_req, res) =>
   res.json({ note: "server busy, partial data", weatherSf: "68F", unrelatedId: "abc-123" }),
 );
 
-// Provider D — contract security scan.
+// Provider D — good, on-topic contract security scan.
 app.get("/audit", (_req, res) =>
-  res.json({ score: 87, risk: "low", issues: [], honeypot: false, mintable: false }),
+  res.json({
+    contract: "0x51ab...04e2",
+    securityScore: 87,
+    risk: "low",
+    honeypot: false,
+    mintable: false,
+    ownershipRenounced: true,
+    proxyUpgradeable: false,
+    checks: [
+      { name: "reentrancy", passed: true },
+      { name: "unlimited-mint", passed: true },
+      { name: "hidden-owner", passed: true },
+      { name: "trading-cooldown", passed: true },
+    ],
+    issues: [],
+  }),
 );
 
 app.listen(PORT, () => {
