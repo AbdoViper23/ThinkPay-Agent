@@ -3,20 +3,16 @@
 import { wrapFetchWithPayment, x402Client, x402HTTPClient } from "@x402/fetch";
 import { registerExactEvmScheme } from "@x402/evm/exact/client";
 import { privateKeyToAccount } from "viem/accounts";
+// Canonical PaidRequest lives with the guardrails (the shape the gate consumes).
+import type { PaidRequest } from "../guardrails/types";
+
+export type { PaidRequest };
 
 export class PaymentError extends Error {
   constructor(message: string, public status?: number) {
     super(message);
     this.name = "PaymentError";
   }
-}
-
-export interface PaidRequest {
-  endpoint: string;
-  method?: "GET" | "POST";
-  args?: unknown; // used for the dedupe hash upstream; NOT sent on a GET
-  estCostAtomic: number; // set before we get here (from the catalog price)
-  approved?: boolean;
 }
 
 function buildClient() {

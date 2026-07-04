@@ -6,9 +6,11 @@
   "scripts": {
     "smoke:btl": "tsx scripts/smoke-btl.ts",
     "smoke:x402": "tsx scripts/smoke-x402.ts",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@mizan/shared": "workspace:*",
     "@x402/core": "2.17.0",
     "@x402/evm": "2.17.0",
     "@x402/fetch": "2.17.0",
@@ -19,6 +21,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "tsx": "^4.23.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
   }
 }

@@ -11,7 +11,14 @@
     "mock": "pnpm --filter mock-provider dev",
     "web": "pnpm --filter web dev",
     "smoke:btl": "pnpm --filter agent smoke:btl",
-    "smoke:x402": "pnpm --filter agent smoke:x402"
+    "smoke:x402": "pnpm --filter agent smoke:x402",
+    "db:push": "drizzle-kit push",
+    "db:seed": "tsx packages/shared/src/db/seed.ts"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "drizzle-kit": "^0.30.0",
+    "tsx": "^4.23.0"
   },
   "pnpm": {
     "overrides": {
