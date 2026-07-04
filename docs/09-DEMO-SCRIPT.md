@@ -4,7 +4,7 @@ Demo day: 5-min demo + 3-min Q&A. The submission video is 2 min. Lead with the m
 
 ## The 2-minute video (submission)
 
-1. **(0:00–0:20) The hook.** "Everyone's building agents that pay for things. The real problem is agents that pay for the *wrong* things, pay *twice*, and pay for *garbage*. ThinkPay is a spending conscience for agents — it decides what's worth paying for, on real money, over x402."
+1. **(0:00–0:20) The hook.** "This is ThinkPay — an AI agent that researches a crypto token for you: who holds it, how deep its liquidity is, whether the contract is safe. To answer, it buys live data from paid APIs over x402 — real USDC, on-chain. The twist: most agents that can pay will pay for the *wrong* things, pay *twice*, and pay for *garbage*. ThinkPay knows when **not** to."
 2. **(0:20–1:10) Cold run.** Enter the task + `$0.25` budget + `$0.05` per-call limit. Narrate as the ledger streams: pays Provider A for holders ✓; pays Provider B for liquidity → **verify flags it off-topic, result dropped, not built on**; pays Provider C instead ✓; **duplicate call blocked, $0.01 saved**; audit is `$0.06` → **over the limit, escalated → Approve**. Finishes ~`$0.098`. Point at the dual ledger: reasoning (BTL) vs tools (x402).
 3. **(1:10–1:40) Warm run.** Same kind of task again. "Now it remembers." It skips the bad provider, goes straight to the best-scored ones, fewer calls, ~`$0.05`. The **"Saved by memory"** figure counts up.
 4. **(1:40–2:00) The close.** "Reasoning on the BTL Runtime, payments over x402, memory and judgment in between. Spot-only USDC, non-custodial, no leverage or gambling. Not a payment demo — a control plane."

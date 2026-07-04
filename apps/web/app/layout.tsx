@@ -20,9 +20,9 @@ const grotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "ThinkPay — a spending conscience for agents",
+  title: "ThinkPay — an AI research agent that knows when not to pay",
   description:
-    "Give the agent a task and a budget. Watch it decide what's worth paying for.",
+    "An AI crypto-research agent that buys its own live data over x402 — holders, liquidity, contract safety — but only when it's worth it. A deterministic conscience caps the budget, skips overpriced and duplicate calls, remembers which providers were cheap and accurate, and verifies every paid result. Reasoning runs on the BTL Runtime.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

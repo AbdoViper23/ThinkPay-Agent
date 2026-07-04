@@ -1,6 +1,6 @@
-# ThinkPay — a spending control plane for AI agents
+# ThinkPay — an AI research agent that knows when not to pay
 
-**A CFO for your agent.** Give it a task and a budget; it decides whether each paid tool call is worth it, remembers which providers are cheap/fast/accurate, verifies it got what it paid for, and refuses to overspend.
+**A CFO for your agent.** Point it at a crypto token and a budget: it researches holder distribution, liquidity depth, and contract safety by buying live data over x402 — deciding whether each paid call is worth it, remembering which providers are cheap/fast/accurate, verifying it got what it paid for, and refusing to overspend. Underneath, it's a spending **control plane** any spending agent can reuse.
 
 Built for the **BTL Runtime Hackathon**. Reasoning runs on the **BTL Runtime**; paid tools are called over **x402** (USDC on Base). The point isn't "an AI that pays" — it's **an AI that decides *not* to pay**, and proves it.
 

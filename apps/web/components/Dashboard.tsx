@@ -104,7 +104,7 @@ export default function Dashboard() {
             </span>
             <div className="flex flex-col leading-none">
               <span className="font-sans text-[15px] font-bold tracking-[-0.01em] text-t-hi">ThinkPay</span>
-              <span className="mt-1 font-sans text-[11px] text-t-low">a spending conscience for agents</span>
+              <span className="mt-1 font-sans text-[11px] text-t-low">an AI research agent that knows when not to pay</span>
             </div>
           </div>
           <StatusStepper />
