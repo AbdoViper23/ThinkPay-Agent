@@ -55,6 +55,10 @@ export const liveSource: RunSource = {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ decisionId, approve }),
     });
+    // 404 = the escalation is no longer pending (already resolved by a prior click, or
+    // auto-resolved). That is a success state for the caller, not an error — the real
+    // outcome arrives on the SSE `decision:update`. Only genuine transport/5xx failures throw.
+    if (res.status === 404) return;
     if (!res.ok) throw new Error(`POST /run/${runId}/approve failed: ${res.status}`);
   },
 

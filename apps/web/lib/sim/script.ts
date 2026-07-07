@@ -226,6 +226,28 @@ const warmTotals: RunTotals = {
   escalations: 0,
 };
 
+/* ── final analysis (compose) — the agent's actual answer, shown when the run finishes ── */
+const COLD_REPORT =
+  "Token XYZ (0x51ab…04e2) on Base — assessment complete.\n\n" +
+  "• Holder distribution: 1,873 holders; top 10 wallets hold 42% of supply (Gini 0.61) — moderate concentration risk.\n" +
+  "• Liquidity depth: $1.25M TVL, $340k pool depth on Uniswap v3; ~0.28% slippage on a $10k trade — adequate for mid-size exits. (First liquidity source returned off-topic data and was rejected; a verified source was used instead.)\n" +
+  "• Contract safety: security score 87/100, ownership renounced, not a honeypot, non-mintable — low risk.\n\n" +
+  "Verdict: XYZ shows healthy liquidity and a clean contract, with moderate holder concentration to watch. Tool spend $0.090 of the $0.25 budget.";
+
+const COLD_DENIED_REPORT =
+  "Token XYZ (0x51ab…04e2) — partial assessment.\n\n" +
+  "• Holder distribution: 1,873 holders; top 10 hold 42% (moderate concentration).\n" +
+  "• Liquidity depth: verified — $1.25M TVL, ~0.28% slippage on $10k.\n" +
+  "• Contract safety: NOT checked — the security scan exceeded the per-call limit and human approval was denied, so it was skipped.\n\n" +
+  "Verdict: liquidity and holders look fine, but the contract was not audited. Re-run with approval for a complete safety picture.";
+
+const WARM_REPORT =
+  "Token XYZ (0x51ab…04e2) — assessment complete (warm run).\n\n" +
+  "• Holder distribution: 1,873 holders; top 10 hold 42% (Gini 0.61) — moderate concentration.\n" +
+  "• Liquidity depth: $1.25M TVL, ~0.28% slippage on $10k — the agent skipped the provider it learned was unreliable and paid only the trusted source.\n" +
+  "• Contract safety: 87/100, ownership renounced, not a honeypot — low risk.\n\n" +
+  "Verdict: same conclusions as the cold run, reached for $0.018 instead of $0.090 — provider memory avoided the wasted call entirely.";
+
 /* ── the scripts ───────────────────────────────────────────────────── */
 export function coldRunScript(runId: string): SimStep[] {
   const { d1, d2, d3, d4, d5 } = coldDecisions(runId);
@@ -300,7 +322,7 @@ export function coldRunScript(runId: string): SimStep[] {
           },
           // set the provider snapshot BEFORE done so the refetch-on-done reads the learned memory
           { after: 2400, providers: providersAfterCold },
-          { after: 2401, emit: { type: "done", data: coldTotalsApproved } },
+          { after: 2401, emit: { type: "done", data: { ...coldTotalsApproved, report: COLD_REPORT } } },
         ],
         denied: [
           {
@@ -311,7 +333,7 @@ export function coldRunScript(runId: string): SimStep[] {
             },
           },
           { after: 2000, providers: providersAfterCold },
-          { after: 2001, emit: { type: "done", data: coldTotalsDenied } },
+          { after: 2001, emit: { type: "done", data: { ...coldTotalsDenied, report: COLD_DENIED_REPORT } } },
         ],
       },
     },
@@ -370,6 +392,6 @@ export function warmRunScript(runId: string): SimStep[] {
     },
 
     { at: 6200, providers: providersAfterWarm },
-    { at: 6201, emit: { type: "done", data: warmTotals } },
+    { at: 6201, emit: { type: "done", data: { ...warmTotals, report: WARM_REPORT } } },
   ];
 }

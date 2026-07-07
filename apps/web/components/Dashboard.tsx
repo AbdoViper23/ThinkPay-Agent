@@ -63,6 +63,7 @@ export default function Dashboard() {
   const budgetAtomic = useThinkPay((s) => s.budgetAtomic);
   const live = useThinkPay((s) => s.live);
   const totals = useThinkPay((s) => s.totals);
+  const report = useThinkPay((s) => s.report);
   const decisions = useThinkPay((s) => s.decisions);
   const pending = useThinkPay((s) => s.pendingEscalations);
   const providers = useThinkPay((s) => s.providers);
@@ -190,6 +191,8 @@ export default function Dashboard() {
               </div>
             )}
           </Panel>
+
+          {report && <FinalAnalysis report={report} />}
         </div>
 
         {/* RIGHT — memory + guardrails */}
@@ -224,6 +227,18 @@ export default function Dashboard() {
         </div>
       </main>
     </div>
+  );
+}
+
+/* ── final analysis (the agent's actual answer) ──────────────────────── */
+function FinalAnalysis({ report }: { report: string }) {
+  return (
+    <Panel title="Final analysis" right={<Muted>agent output</Muted>}>
+      <div className="flex items-start gap-2.5">
+        <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#B08D3F]" />
+        <p className="whitespace-pre-line text-[13px] leading-relaxed text-[#12131A]/85">{report}</p>
+      </div>
+    </Panel>
   );
 }
 

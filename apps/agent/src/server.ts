@@ -97,9 +97,9 @@ async function driveRun(runId: string, run: ReturnType<typeof createRun>, cfg: R
   };
 
   try {
-    const { totals } = await runLoop(run, cfg, hooks);
+    const { totals, report } = await runLoop(run, cfg, hooks);
     finishRun(runId, totals, "done"); // persist totals so runs table == the `done` event (acceptance #3)
-    emit(runId, { type: "done", data: totals });
+    emit(runId, { type: "done", data: { ...totals, report } }); // report = the agent's final analysis
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     console.error(`✗ run ${runId} failed:`, message);

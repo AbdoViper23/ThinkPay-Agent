@@ -33,6 +33,7 @@ interface ThinkPayStore {
   /** derived incrementally per event so the meter moves BEFORE `done` */
   live: { spentToolAtomic: number; savedCacheAtomic: number };
   totals: RunTotals | null;
+  report: string | null; // the agent's final composed analysis, set on `done`
 
   providers: ProviderStat[];
   completedRuns: CompletedRun[];
@@ -68,6 +69,7 @@ export const useThinkPay = create<ThinkPayStore>()((set, get) => ({
 
   live: { spentToolAtomic: 0, savedCacheAtomic: 0 },
   totals: null,
+  report: null,
 
   providers: [],
   completedRuns: [],
@@ -92,6 +94,7 @@ export const useThinkPay = create<ThinkPayStore>()((set, get) => ({
       pendingEscalations: {},
       live: { spentToolAtomic: 0, savedCacheAtomic: 0 },
       totals: null,
+      report: null,
       error: null,
     });
   },
@@ -158,6 +161,7 @@ export const useThinkPay = create<ThinkPayStore>()((set, get) => ({
         const warm = s.runCount > 1;
         set({
           totals: e.data,
+          report: e.data.report ?? null,
           runStatus: "done",
           statusNote: null,
           completedRuns: [...s.completedRuns, { runId: s.runId ?? "?", totals: e.data, warm }],
@@ -179,6 +183,7 @@ export const useThinkPay = create<ThinkPayStore>()((set, get) => ({
       pendingEscalations: {},
       live: { spentToolAtomic: 0, savedCacheAtomic: 0 },
       totals: null,
+      report: null,
       error: null,
     }),
 }));

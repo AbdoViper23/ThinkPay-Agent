@@ -63,10 +63,15 @@ export interface RunTotals {
   escalations: number;
 }
 
+/** The `done` payload: run money-totals plus the agent's final composed analysis. */
+export interface RunDone extends RunTotals {
+  report: string; // the compose() summary of all verified findings — the agent's actual answer
+}
+
 /** SSE wire events — GET /run/:id/stream */
 export type RunEvent =
   | { type: "status"; data: { state: RunStatusState; note?: string } }
   | { type: "decision"; data: Decision }
   | { type: "decision:update"; data: Decision }
   | { type: "escalation"; data: { decisionId: string; reason: string } }
-  | { type: "done"; data: RunTotals };
+  | { type: "done"; data: RunDone };

@@ -49,13 +49,22 @@ export async function startRun(cfg: RunConfig): Promise<void> {
   }
 }
 
+// Guards against a double-fire (button click + "a"/"d" hotkey, or a double-click) sending
+// two approve POSTs — the second would 404 and, before, surfaced a spurious error.
+const approvalsInFlight = new Set<string>();
+
 export async function respondEscalation(decisionId: string, approve: boolean): Promise<void> {
   const { runId } = useThinkPay.getState();
-  if (!runId) return;
+  if (!runId || approvalsInFlight.has(decisionId)) return;
+  approvalsInFlight.add(decisionId);
   try {
     await getSource().approve(runId, decisionId, approve);
   } catch {
-    useThinkPay.getState().failRun("Approval failed to reach the agent");
+    // Transient failure only (404-already-resolved is swallowed in the source). The
+    // authoritative outcome still arrives on the SSE `decision:update`, so don't fail the
+    // whole run over a flaky approve POST — leave the escalation actionable.
+  } finally {
+    approvalsInFlight.delete(decisionId);
   }
 }
 
