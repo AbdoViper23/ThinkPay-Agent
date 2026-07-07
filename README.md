@@ -258,9 +258,10 @@ Then fill in `.env` (it is gitignored — never commit it):
 
 | Variable | What it is | How to get it |
 |---|---|---|
-| `GATEWAY_API_KEY` | BTL Runtime auth — reasoning + verify judge | From your BTL Runtime account |
-| `EVM_PRIVATE_KEY` | The agent's own wallet key — signs USDC over x402 | Generate a throwaway one ↓ |
-| `SERVER_PAY_TO_ADDRESS` | Where the mock-provider receives payment | Any address you control (can be the same wallet) |
+| `GATEWAY_API_KEY` | BTL Runtime auth (inference scope) — reasoning + verify judge | From your BTL Runtime / hackathon dashboard |
+| `EVM_PRIVATE_KEY` | The agent's own wallet key (`0x…`) — the **only** secret the payment module reads, never enters a prompt | Generate a throwaway one ↓ |
+| `SERVER_PAY_TO_ADDRESS` | Address that receives test USDC on the mock-provider | Any address you control (your own wallet is fine) |
+| `X402_FACILITATOR_URL` | x402 testnet facilitator (no signup) | Already filled — leave as-is (`https://x402.org/facilitator`) |
 
 **Generate a throwaway test wallet:**
 
@@ -274,30 +275,39 @@ npx tsx -e "import{generatePrivateKey,privateKeyToAccount}from 'viem/accounts';c
 
 > USDC on Base Sepolia is `0x036CbD53842c5426634e7929541eC2318f3dCF7e` and has **6 decimals** (`$0.10 = 100000` atomic units).
 
-### Step 3 — Set up the database
+### Step 3 — Rebuild the database and stage the demo state
 
 ```bash
-pnpm db:push     # create the SQLite tables (Drizzle)
-pnpm db:seed     # seed providers (good + bad, same capability) for the warm-run demo
+pnpm db:push          # recreate the SQLite tables from scratch (empty schema)
+pnpm db:seed:cold     # seed providers for the cold→warm scenario
+                      #   (stages the BAD provider to look cheap/attractive at first)
 ```
 
-### Step 4 — Start the three services (three terminals)
+### Step 4 — Start the three processes (each in its own terminal)
 
 ```bash
-pnpm --filter mock-provider dev   # ① paid x402 endpoints        → http://localhost:4021
-pnpm --filter agent dev           # ② agent loop + API + SSE      → http://localhost:3001
-pnpm --filter web dev             # ③ live dashboard              → http://localhost:3000
+pnpm mock      # mock server running the paid x402 services (fake providers)   → :4021
+pnpm agent     # the backend / agent brain + the SSE stream the dashboard reads → :3001
+pnpm web       # the dashboard (Next.js) you present during the demo            → :3000
 ```
 
-| Service | Port | Role |
+| Command | Port | Role |
 |---|---|---|
-| `mock-provider` | `4021` | 3–4 paid APIs on Base Sepolia — the demo's safety net so nothing depends on a flaky third party |
-| `agent` | `3001` | The heart: the loop, guardrails, verify, memory, x402 client, and the SSE the dashboard reads |
-| `web` | `3000` | The Next.js dashboard — open this in your browser |
+| `pnpm mock` | `4021` | Paid x402 endpoints on Base Sepolia — the demo's safety net so nothing depends on a flaky third party |
+| `pnpm agent` | `3001` | The heart: the loop, guardrails, verify, memory, x402 client, and the SSE the dashboard reads |
+| `pnpm web` | `3000` | The Next.js dashboard — open this in your browser |
 
-### Step 5 — Run an agent
+### Step 5 — Open the demo
 
-Open **http://localhost:3000**, enter a task + a budget + a per-call limit, and hit run. Watch the ledger stream live: **reasoning → guardrail check → payment → verify**, decision by decision.
+1. Browser → **http://localhost:3000**
+2. Click **Launch app**
+3. Switch the toggle to **Live**
+4. **Run** → this is the **cold** run (empty memory, learns the providers) ≈ `$0.098`
+5. **Run again** → this is the **warm** run (skips the bad provider) ≈ `$0.05`
+
+Watch the ledger stream live — **reasoning → guardrail check → payment → verify**, decision by decision. The **"Saved by memory"** figure counting up on the warm run is the money shot.
+
+> To reset back to the cold state between demos, just re-run `pnpm db:seed:cold`.
 
 ### Verify it works (smoke tests)
 
@@ -306,14 +316,6 @@ pnpm --filter agent test    # guardrail unit tests — no network needed
 pnpm smoke:btl              # confirm the BTL Runtime key + reasoning work
 pnpm smoke:x402             # confirm an end-to-end x402 payment settles
 ```
-
-### Reproduce the cold → warm demo
-
-```bash
-pnpm db:seed:cold   # reset to the "cold" state (bad provider staged as an attractive decoy)
-```
-
-Run once (**cold** ≈ `$0.098`, learns the providers), then run again (**warm** ≈ `$0.05`, skips the bad one). The **"Saved by memory"** figure is the money shot.
 
 > Every constant, faucet link, and gotcha is documented in [`CLAUDE.md`](CLAUDE.md) — the project's ground-truth context file.
 
